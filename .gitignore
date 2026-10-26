@@ -1,0 +1,61 @@
+# ---- Personal health data (NEVER commit) ----
+data/personal/
+data/kaggle/*.csv
+!data/kaggle/.gitkeep
+
+# ---- Trained models ----
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+
+# ---- Generated outputs ----
+reports/*.png
+reports/*.pdf
+reports/*.html
+!reports/.gitkeep
+fhir/*.json
+!fhir/.gitkeep
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ---- Virtual envs ----
+venv/
+env/
+ENV/
+.venv/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ---- IDE / OS ----
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Env / secrets ----
+.env
+.env.local
+*.key
