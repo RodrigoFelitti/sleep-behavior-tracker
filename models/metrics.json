@@ -1,0 +1,64 @@
+{
+  "winner": "RandomForest",
+  "features": [
+    "Sleep Duration",
+    "Heart Rate",
+    "Physical Activity Level",
+    "Stress Level",
+    "Daily Steps"
+  ],
+  "random_state": 42,
+  "train_size": 299,
+  "test_size": 75,
+  "class_balance_train": {
+    "1": 0.686,
+    "0": 0.314
+  },
+  "cv_scores": {
+    "logistic_regression": {
+      "mean": {
+        "accuracy": 0.9766666666666666,
+        "f1": 0.9825887429057131,
+        "roc_auc": 0.9985879332477536,
+        "precision": 0.9951219512195122,
+        "recall": 0.9707317073170731
+      },
+      "std": {
+        "accuracy": 0.016996731711975955,
+        "f1": 0.012853270404418145,
+        "roc_auc": 0.0013091192589455207,
+        "precision": 0.009756097560975618,
+        "recall": 0.023897460905201718
+      }
+    },
+    "random_forest": {
+      "mean": {
+        "accuracy": 0.99,
+        "f1": 0.9926520898408449,
+        "roc_auc": 0.9985879332477534,
+        "precision": 0.9952380952380953,
+        "recall": 0.9902439024390244
+      },
+      "std": {
+        "accuracy": 0.008164965809277286,
+        "f1": 0.0060005268279690075,
+        "roc_auc": 0.0013091192589455118,
+        "precision": 0.009523809523809533,
+        "recall": 0.01194873045260088
+      }
+    }
+  },
+  "random_forest_best_params": {
+    "clf__class_weight": null,
+    "clf__max_depth": null,
+    "clf__min_samples_split": 5,
+    "clf__n_estimators": 300
+  },
+  "test_metrics": {
+    "accuracy": 0.9733333333333334,
+    "f1": 0.9811320754716981,
+    "roc_auc": 0.9983277591973243,
+    "precision": 0.9629629629629629,
+    "recall": 1.0
+  }
+}
