@@ -1,22 +1,10 @@
-#!/usr/bin/env python3
-"""Load the trained model and run it on wearable_nights.csv.
-
-Last part of the pipeline:
-
-1. 14 Days: Run morning_report.py -> Individual daily reports + self_report.csv
-2. Export Samsung Health data (wearable_nights.csv) -> Run align_features.py -> feature aligned wearable_nights.csv
-3. Run Predict on top of wearable_nights.csv 
-
-"""
-
 import argparse
-import sys
 from pathlib import Path
 
 import joblib
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent
 
 FEATURES = [
     "Sleep Duration",
@@ -28,53 +16,40 @@ FEATURES = [
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", "-m", type=Path,
-                        default=PROJECT_ROOT / "models" / "model.pkl")
-    parser.add_argument("--wearable", "-w", type=Path,
-                        default=PROJECT_ROOT / "data" / "personal" / "wearable_nights.csv")
-    parser.add_argument("--kaggle", "-k", type=Path,
-                        default=PROJECT_ROOT / "data" / "kaggle" / "Sleep_health_and_lifestyle_dataset.csv",
-                        help="Used to compute median values for filling missing inputs")
-    parser.add_argument("--out", "-o", type=Path,
-                        default=PROJECT_ROOT / "data" / "personal" / "predictions.csv")
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", "-m", type=Path, default=ROOT / "models" / "model.pkl")
+    ap.add_argument("--wearable", "-w", type=Path, default=ROOT / "data" / "personal" / "wearable_nights.csv")
+    ap.add_argument("--kaggle", "-k", type=Path, default=ROOT / "data" / "kaggle" / "Sleep_health_and_lifestyle_dataset.csv")
+    ap.add_argument("--out", "-o", type=Path, default=ROOT / "data" / "personal" / "predictions.csv")
+    args = ap.parse_args()
 
-    for p in [args.model, args.wearable, args.kaggle]:
+    for p in (args.model, args.wearable, args.kaggle):
         if not p.exists():
-            print(f"error: {p} not found")
-            sys.exit(2)
+            raise SystemExit(f"not found: {p}")
 
     model = joblib.load(args.model)
     df = pd.read_csv(args.wearable)
-    print(f"Loaded {len(df)} wearable night(s)")
 
     X = df[FEATURES].copy()
-    had_nan = X.isna().any(axis=1)
-    if had_nan.any():
-        # fill missing values with the median from the Kaggle training set
+    missing = X.isna().any(axis=1)
+    if missing.any():
         kaggle = pd.read_csv(args.kaggle)
         medians = {f: kaggle[f].median() for f in FEATURES}
-        print(f"Filling NaN in {had_nan.sum()} row(s) with Kaggle medians")
         X = X.fillna(medians)
+        print(f"filled {missing.sum()} row(s) with kaggle medians")
 
-    labels = model.predict(X)
-    probas = model.predict_proba(X)[:, 1]
-
-    out = df.copy()
-    out["predicted_label"] = labels
-    out["predicted_proba_good"] = probas.round(3)
-    out["filled_with_median"] = had_nan.values
+    df["predicted_label"] = model.predict(X)
+    df["predicted_proba_good"] = model.predict_proba(X)[:, 1].round(3)
+    df["filled_with_median"] = missing.values
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    out.to_csv(args.out, index=False)
+    df.to_csv(args.out, index=False)
 
     print()
-    print(out[["date", "predicted_label", "predicted_proba_good",
-               "filled_with_median"]].to_string(index=False))
+    print(df[["date", "predicted_label", "predicted_proba_good", "filled_with_median"]].to_string(index=False))
     print()
-    print(f"Wrote {args.out}")
-    print(f"Summary: {int((labels == 1).sum())} good, {int((labels == 0).sum())} poor")
+    good = int((df["predicted_label"] == 1).sum())
+    print(f"{good} good, {len(df) - good} poor  ->  {args.out}")
 
 
 if __name__ == "__main__":
